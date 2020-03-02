@@ -1,0 +1,188 @@
+<!--    *******************************************************************************************************************-->
+<!--    Build Script in Ant for Unilever Salesforce Projects - BEGIN                                               -->
+<!--    Author : Steve & Velumani Angappan - Salesforce & Cognizant    Last Modified Date : 14/11/2015                     -->
+<!--    ******************************************************************************************************************* -->
+<project name="salesforce" default="validate" basedir="." xmlns:sf="antlib:com.salesforce">
+
+  <!-- *************************************************************** -->
+  <!--   Properties for Salesforce ANT targets                         -->
+  <!-- *************************************************************** -->
+  <property file="${basedir}/build.properties"/>
+  <property environment="env"/>
+  <!-- Properties for salesforce dataloader CLI for IPM NG-->
+  <property name="dataLoaderAPIVersion" value="35.0.0-uber" />
+  <!-- *************************************************************** -->
+  <!--   Set-Up of Salesforce Ant / CLI Jar Classpath for IPM NG       -->
+  <!-- *************************************************************** -->
+  <!-- Define required jars for salesforce dataloder CLI-->
+  <path id="taskDependencies">
+    <pathelement location="${basedir}/lib/ant.jar"/>
+    <pathelement location="${basedir}/lib/antutils.jar"/>
+    <pathelement location="${basedir}/lib/commons-io-2.4.jar"/>
+    <pathelement location="${basedir}/lib/commons-lang-2.6.jar"/>
+    <pathelement location="${basedir}/lib/commons-logging-1.1.3.jar"/>
+    <pathelement location="${basedir}/lib/gson-2.2.4.jar"/>
+    <pathelement location="${basedir}/lib/httpclient-4.3.5.jar"/>
+    <pathelement location="${basedir}/lib/httpcore-4.3.2.jar"/>
+    <pathelement location="${basedir}/lib/json-20080701.jar"/>
+  </path>
+  <!-- Define salesforce Ant Jar-->
+  <taskdef resource="com/salesforce/antlib.xml" uri="antlib:com.salesforce">
+    <classpath>
+      <pathelement location="${basedir}/lib/ant-salesforce.jar" />
+    </classpath>
+  </taskdef>
+  <!-- ***************************************************************************** -->
+  <!-- ANT Import Files for invoking APEX inside ANT Scripts                         -->
+  <!-- ***************************************************************************** -->
+  <!--<import file="${basedir}/lib/exec_anon.xml"/>
+  <import file="${basedir}/lib/deploy.xml"/>
+  <import file="${basedir}/lib/undeploy.xml"/>
+  <import file="${basedir}/lib/run_tests.xml"/>-->
+  <import file="${basedir}/lib/package_generator.xml"/>
+  <!-- ***************************************************************************** -->
+  <!-- Recreate the deployment directory and retrieve  meta-data from your org     -->
+  <!-- ***************************************************************************** -->
+  <target name="retrieve" description="Recreate the deployment directory and retrieve all metadata from your org">
+    <echo level="info">Performing a retrieve</echo>
+    <mkdir dir="${basedir}/${sfdc.retrieveTarget}"/>
+    <sf:retrieve username="${sf.username}"
+     password="${sf.password}"
+     serverurl="${sf.serverurl}"
+     retrieveTarget="${basedir}/${sfdc.retrieveTarget}"
+     unpackaged="src/package.xml"
+     pollWaitMillis="${sfdc.pollWaitMillis}"
+     maxPoll="${sfdc.maxPoll}"/>
+     <delete includeemptydirs="true">
+      <fileset dir="src" includes="**/*"/>
+    </delete>
+    <move file="${basedir}/${sfdc.retrieveTarget}" tofile="src"/>
+  </target>
+
+  <target name="retrieve-updates" description="Retrieve update(s)">
+    <echo level="info">Performing a retrieve</echo>
+    <mkdir dir="${basedir}/${sfdc.retrieveTarget}"/>
+    <sf:retrieve username="${sf.username}"
+     password="${sf.password}"
+     serverurl="${sf.serverurl}"
+     retrieveTarget="${basedir}/${sfdc.retrieveTarget}"
+     unpackaged="src/package.xml"
+     pollWaitMillis="${sfdc.pollWaitMillis}"
+     maxPoll="${sfdc.maxPoll}"/>
+    <copy todir="src">
+      <fileset dir="${basedir}/${sfdc.retrieveTarget}"/>
+    </copy>
+  </target>  
+
+  <target name="validatenDeploy">
+    <echo level="info">Demo Sonar and Salesforce deployment</echo>
+    <sf:deploy username="${sf.username}"
+      password="${sf.password}"
+      serverurl="${sf.serverurl}"
+      checkOnly="false"
+      logType="Debugonly"
+      testLevel="RunSpecifiedTests"
+      allowMissingFiles="true"
+      autoUpdatePackage="true"
+      ignoreWarnings="true"
+      deployRoot="src"
+      pollWaitMillis="${sfdc.pollWaitMillis}"
+      maxPoll="${sfdc.maxPoll}">
+      <runTest>Your_test_class_here</runTest>
+    </sf:deploy>
+</target>
+
+
+  <target name="validate-updates" description="Validate updates">
+    <echo level="info">Performing a validation</echo>
+    <sf:deploy username="${sf.username}"
+      password="${sf.password}"
+      serverurl="${sf.serverurl}"
+      checkOnly="true"
+      logType="Debugonly"
+      allowMissingFiles="true"
+      autoUpdatePackage="true"
+      ignoreWarnings="true"
+      deployRoot="${basedir}/${sfdc.retrieveTarget}"
+      pollWaitMillis="${sfdc.pollWaitMillis}"
+      maxPoll="${sfdc.maxPoll}">
+    </sf:deploy>    
+  </target>  
+  <!-- ***************************************************************************** -->
+  <!-- QuickDeploy the meta-data from code Repository to salesforce your org     -->
+  <!-- ***************************************************************************** -->
+   <target name="quickdeploy">
+        <echo level="info">Performing the deploy</echo>
+        <sf:deploy username="${sf.username}"
+        password="${sf.password}"
+        serverurl="${sf.serverurl}"
+        recentValidationId = "${sf.validationid}"
+        deployRoot="${basedir}/src"
+        pollWaitMillis="${sfdc.pollWaitMillis}"
+        maxPoll="${sfdc.maxPoll}"/>
+    </target>
+  <!-- ***************************************************************************** -->
+  <!-- Deploy the meta-data from code Repository to salesforce your org     -->
+  <!-- ***************************************************************************** -->
+  <target name="deploy">
+    <echo level="info">Performing the deploy</echo>
+    <sf:deploy username="${sf.username}"
+      password="${sf.password}"
+      serverurl="${sf.serverurl}"
+      runAllTests="false"
+      testLevel="NoTestRun"
+      logType="Detail"
+      allowMissingFiles="true"
+      autoUpdatePackage="true"
+      ignoreWarnings="true"
+      deployRoot="${basedir}/src"
+      pollWaitMillis="${sfdc.pollWaitMillis}"
+      maxPoll="${sfdc.maxPoll}"/>
+  </target>
+
+ 
+ 
+
+  <!-- ***************************************************************************** -->
+  <!-- Validate the  set of meta-data before deployment with Test run                -->
+  <!-- ***************************************************************************** -->
+  <target name="validate">
+    <echo level="info">Testing the deployment</echo>
+    <sf:deploy username="${sf.username}"
+      password="${sf.password}"
+      serverurl="${sf.serverurl}"
+      checkOnly="true"
+      testLevel="RunSpecifiedTests"
+      logType="Debugonly"
+      allowMissingFiles="true"
+      autoUpdatePackage="true"
+      ignoreWarnings="true"
+      deployRoot="src"
+      pollWaitMillis="${sfdc.pollWaitMillis}"
+      maxPoll="${sfdc.maxPoll}">
+	 <runTest>Your_test_class_here</runTest>
+
+	   </sf:deploy>
+  </target>
+  <!-- ***************************************************************************** -->
+  <!-- Validate the  set of IPM NG meta-data before deployment without Test Classes  -->
+  <!-- ***************************************************************************** -->
+  <target name="validateNoTests">
+    <echo level="info">Validate the deployment without running unit tests</echo>
+    <sf:deploy username="${sf.username}"
+      password="${sf.password}"
+      serverurl="${sf.serverurl}"
+      checkOnly="true"
+	  testLevel="NoTestRun"
+      logType="Debugonly"
+      allowMissingFiles="true"
+      autoUpdatePackage="true"
+      ignoreWarnings="true"
+      deployRoot="src"
+      pollWaitMillis="${sfdc.pollWaitMillis}"
+      maxPoll="${sfdc.maxPoll}">
+    </sf:deploy>
+  </target>
+ 
+
+</project>
