@@ -248,10 +248,7 @@
         <members>*</members>
         <name>Report</name>
     </types> -->
-    <types>
-        <members>*</members>
-        <name>ReportType</name>
-    </types>
+
     <types>
         <members>*</members>
         <name>ReportType</name>
@@ -260,22 +257,12 @@
         <members>*</members>
         <name>Role</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>Role</name>
-    </types>
+
     <types>
         <members>*</members>
         <name>SamlSsoConfig</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>SamlSsoConfig</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Scontrol</name>
-    </types>
+
     <types>
         <members>*</members>
         <name>Scontrol</name>
@@ -284,14 +271,7 @@
         <members>*</members>
         <name>SharingCriteriaRule</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>SharingCriteriaRule</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>SharingOwnerRule</name>
-    </types>
+
     <types>
         <members>*</members>
         <name>SharingOwnerRule</name>
@@ -300,14 +280,7 @@
         <members>*</members>
         <name>SiteDotCom</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>SiteDotCom</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Translations</name>
-    </types>
+
     <types>
         <members>*</members>
         <name>Translations</name>
@@ -316,14 +289,7 @@
         <members>*</members>
         <name>Workflow</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>Workflow</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Settings</name>
-    </types>
+
     <types>
         <members>*</members>
         <name>Settings</name>
